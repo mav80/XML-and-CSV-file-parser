@@ -176,7 +176,7 @@ public class MainProgram {
 		
 		
 		
-		System.out.println("Sending file to method for parsing...");
+		System.out.println("Sending CSV file to method for parsing...");
 		
 		String SAMPLE_CSV_FILE_PATH = "/home/mav/workspace/WorkInterviewTasks/CoreServices/testFile01.csv";
 		
@@ -205,8 +205,7 @@ public class MainProgram {
 
 			}	
 		} else {
-			System.out.println("Parsing didn't return any valid orders!");
-			System.exit(1);
+			System.out.println("Parsing CSV didn't return any valid orders!");
 		}
 		
 		
@@ -222,7 +221,36 @@ public class MainProgram {
 		
 		System.out.println("---------------------------------- here we parse xml file -------------------------------------");
 		
+		System.out.println("Sending XML file to method for parsing...");
 		
+		
+		List<Order> XMLorders = new ArrayList<>();
+		XMLorders = parseXMLfile("/home/mav/workspace/WorkInterviewTasks/CoreServices/testFile02.Xml");
+		
+		if(XMLorders.size()  > 0) {
+			System.out.println("...parsed. Returned " + XMLorders.size() + " orders. Here they are:");
+			
+			dbConnection connection = new dbConnection();
+			
+			for(Order order : XMLorders) {
+				System.out.println(order.toString());
+				System.out.println("Saving XML order to database.");
+				
+				try {
+					order.addOrderToDB(connection.getConnection());
+					System.out.println("XML order scuccessfully added to database.");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					System.out.println("Error occured when adding XML order to database.");
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+
+			}	
+		} else {
+			System.out.println("Parsing XML didn't return any valid orders!");
+		}
 		
 		
 		
@@ -233,7 +261,8 @@ public class MainProgram {
 		
 		
 		//here we fiddle with xml parsing
-		
+		//works, now let's turn it into a method
+/*	
 		List<Order> xmlOrders = null;
 		Order xmlOrder = null;
 		String text = null;
@@ -256,7 +285,6 @@ public class MainProgram {
 	
 	                         if ("request".equals(reader.getLocalName())) {
 	                        	 xmlOrder = new Order();
-	                        	 //xmlOrder.setID(reader.getAttributeValue(0)); //unnecessary - our orders have automatically assigned id
 	                         }
 	
 	                         if ("requests".equals(reader.getLocalName()))
@@ -282,8 +310,15 @@ public class MainProgram {
 	                              }
 	
 	                              case "clientId": {
-	                            	  xmlOrder.setClientId(text);
-	                                  break;
+	                            	  
+	              	                if(text.length() > 6 || text.length() < 1 ||text.contains(" ")) {
+	            	                	System.out.println("Wrong value of the field ClientId while parsing XML order, field will have null value.");
+	            	                	xmlOrder.setClientId(null);
+	            	                } else {
+	            	                	xmlOrder.setClientId(text);
+	            	                }
+
+	              	                break;
 	                              }
 	
 	                              case "requestId": {
@@ -297,8 +332,15 @@ public class MainProgram {
 	                              }
 	
 	                              case "name": {
-	                            	  xmlOrder.setName(text);
-	                                   break;
+	                            	  
+	              	                if(text.isEmpty() || text.length() > 255) {
+	                            		System.out.println("Wrong value of the field Name while parsing XML order, field will have null value.");
+	                            		xmlOrder.setName(null);
+	            	                } else {
+	            	                	xmlOrder.setName(text);
+	            	                }
+
+	              	                break;
 	                              }
 	
 	                              case "quantity": {
@@ -308,7 +350,7 @@ public class MainProgram {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-	                                   break;
+	                            	  break;
 	                              }
 	                              
 	                              case "price": {
@@ -318,7 +360,7 @@ public class MainProgram {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-	                                  break;
+	                            	  break;
 	                              }
 	
 	                         }
@@ -353,14 +395,7 @@ public class MainProgram {
 					
 	          }
 
-			
-			
-			
-			
 	
-			
-			
-			
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("XML file not found!");
@@ -371,7 +406,7 @@ public class MainProgram {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+*/
 		
 		
 		
@@ -585,6 +620,143 @@ public class MainProgram {
 		
 		return parsedOrders;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public static List<Order> parseXMLfile(String pathToFile) {
+		
+		List<Order> xmlOrders = null;
+		Order xmlOrder = null;
+		String text = null;
+
+
+		XMLInputFactory factory = XMLInputFactory.newInstance();
+		try {
+			XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(new File("/home/mav/workspace/WorkInterviewTasks/CoreServices/testFile02.Xml")));
+			
+	          while (reader.hasNext()) {
+	
+	               int Event = reader.next();
+
+	               switch (Event) {
+	                    case XMLStreamConstants.START_ELEMENT: {
+	
+	                         if ("request".equals(reader.getLocalName())) {
+	                        	 xmlOrder = new Order();
+	                         }
+
+	                         if ("requests".equals(reader.getLocalName()))
+	                        	 xmlOrders = new ArrayList<>();
+	                         break;
+	                    }
+	
+	                    case XMLStreamConstants.CHARACTERS: {
+	                         text = reader.getText().trim();
+	                         break;
+	                    }
+	
+	                    case XMLStreamConstants.END_ELEMENT: {
+	                         switch (reader.getLocalName()) {
+	
+	                              case "request": {
+	                            	  xmlOrders.add(xmlOrder);
+	                                  break;
+	                              }
+	
+	                              case "clientId": {        	  
+	              	                if(text.length() > 6 || text.length() < 1 ||text.contains(" ")) {
+	            	                	System.out.println("Wrong value of the field ClientId while parsing XML order, field will have null value.");
+	            	                	xmlOrder.setClientId(null);
+	            	                } else {
+	            	                	xmlOrder.setClientId(text);
+	            	                }
+	              	                break;
+	                              }
+	
+	                              case "requestId": {
+	                            	  try {
+										xmlOrder.setRequestId(Long.parseLong(text));
+									} catch (NumberFormatException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+	                                break;
+	                              }
+	
+	                              case "name": {
+	              	                if(text.isEmpty() || text.length() > 255) {
+	                            		System.out.println("Wrong value of the field Name while parsing XML order, field will have null value.");
+	                            		xmlOrder.setName(null);
+	            	                } else {
+	            	                	xmlOrder.setName(text);
+	            	                }
+	              	                break;
+	                              }
+	
+	                              case "quantity": {
+	                            	  try {
+										xmlOrder.setQuantity(Integer.parseInt(text));
+									} catch (NumberFormatException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+	                            	break;
+	                              }
+	                              
+	                              case "price": {
+	                            	  try {
+										xmlOrder.setPrice(Double.parseDouble(text));
+									} catch (NumberFormatException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+	                            	break;
+	                              }
+	
+	                         }
+	                         break;
+	                    }
+	               }
+	          }
+		} catch (FileNotFoundException e) {
+			System.out.println("XML file not found!");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (XMLStreamException e) {
+			System.out.println("Parsing exception of XML file.");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return xmlOrders; 
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
