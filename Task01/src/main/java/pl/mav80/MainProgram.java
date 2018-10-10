@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,7 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+
 
 
 public class MainProgram {
@@ -60,9 +62,6 @@ public class MainProgram {
 		
 		
 		
-		
-		
-		
 		//let's parse every file on the list using the method suitable for it's format
 		System.out.println("Parsing files from arguments...");
 		
@@ -72,7 +71,6 @@ public class MainProgram {
 		int numberOfFilesParsed = 0;
 		
 		for(String arg : finalArgs) {
-			
 				
 			Matcher matcherCSV = patternCSV.matcher(arg.toLowerCase());
 			Matcher matcherXML = patternXML.matcher(arg.toLowerCase());
@@ -97,13 +95,17 @@ public class MainProgram {
 			} else {
 				System.out.println("Unknown file format, skipping file.");
 			}
-			
-			
-			
 		}
 		
 		System.out.println("Found: " + orders.size() + " orders in " +  numberOfFilesParsed + " files.");
 		
+		
+		
+		
+		
+		
+		
+		//save orders to database, if any
 		if(orders.size() > 0 ) {
 			System.out.print("Writing orders to database...");
 			
@@ -122,14 +124,154 @@ public class MainProgram {
 
 			}	
 			System.out.println(" done.");
+			
 		}
 		
+
 		
+
+		
+		
+		
+		//if there are any orders in our database, let's continue
 		if(orders.size() < 1 ) {
 			System.out.println("0 orders were added to database, program will now terminate.");
 			System.exit(1);
 		}
-		System.out.println("\nProgram menu:");
+			
+		int userInput = -1;
+		
+		while (userInput != 0) {
+			
+			displayProgramMenu();
+			userInput = getNumberFromConsole();
+			
+			if (userInput == 1) {
+				dbConnection connection = new dbConnection();
+				try {
+					int numberOfOrders = Order.getNumberOfOrdersInDB(connection.getConnection());
+					System.out.println("W bazie jest " + numberOfOrders + " zamowien. (Number of orders in database: " + numberOfOrders + ")");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 2) {
+				String userId = getStringFromConsole();
+				dbConnection connection = new dbConnection();
+				try {
+					int numberOfOrders = Order.getNumberOfOrdersForASingleClient(connection.getConnection(), userId);
+					System.out.println("Uzytkownik o id  " + userId  + " ma " + numberOfOrders + " zamowien. (User of id " + userId  + " has " + numberOfOrders + " orders)");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 3) {
+				dbConnection connection = new dbConnection();
+				try {
+					double valueOfAllOrders = Order.getTotalValueOfOrdersInDB(connection.getConnection());
+					System.out.println("Laczna kwota zamowien w bazie: " + round(valueOfAllOrders, 2) + ". (Total value of orders in database: " + valueOfAllOrders + ")");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 4) {
+				String userId = getStringFromConsole();
+				dbConnection connection = new dbConnection();
+				try {
+					double valueOfAllOrdersForASingleClient = Order.getTotalValueOfOrdersForASingleClient(connection.getConnection(), userId);
+					System.out.println("Laczna kwota zamowien dla klienta o id " + userId + " wynosi "+ round(valueOfAllOrdersForASingleClient, 2) + ". (Total value of orders for a client of id " + userId + 
+							" equals " + round(valueOfAllOrdersForASingleClient, 2) + ")");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 5) {
+				dbConnection connection = new dbConnection();
+				try {
+					ArrayList<Order> allOrders = Order.loadAllOrders(connection.getConnection());
+					System.out.println("Oto wszystkie zamownienia znajdujace sie w bazie (Here are all the orders in database):");
+					if(!allOrders.isEmpty()) {
+						for(Order order : allOrders) {
+							System.out.println(order.toString());
+						} 
+					} else {
+						System.out.println("Brak zamowien w bazie (No orders in database).");
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 6) {
+				String userId = getStringFromConsole();
+				dbConnection connection = new dbConnection();
+				try {
+					ArrayList<Order> allOrdersForASingleUser = Order.loadAllOrdersForASingleUser(connection.getConnection(), userId);
+					System.out.println("Oto wszystkie zamownienia dla klienta o id " + userId + " (Here are all the orders for a client of id " + userId +"):");
+					if(!allOrdersForASingleUser.isEmpty()) {
+						for(Order order : allOrdersForASingleUser) {
+							System.out.println(order.toString());
+						} 
+					} else {
+						System.out.println("Brak zamowien w bazie (No orders in database).");
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 7) {
+				dbConnection connection = new dbConnection();
+				try {
+					double averageValueOfAnOrder = Order.countAverageValueOfAllOrders(connection.getConnection());
+					System.out.println("Srednia wartosc zamowienia: " + round(averageValueOfAnOrder, 2) + ". (Average value of an order: " + round(averageValueOfAnOrder, 2)  + ")");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 8) {
+				String userId = getStringFromConsole();
+				dbConnection connection = new dbConnection();
+				try {
+					double averageValueOfAnOrder = Order.countAverageValueOfOrdersOfASingleUser(connection.getConnection(), userId);
+					System.out.println("Srednia wartosc zamowienia uzytkownika o id: " + userId + " wynosi " + round(averageValueOfAnOrder, 2) + ". (Average value of an order for user of an id  " + userId +
+							 " is " +round(averageValueOfAnOrder, 2)  + ")");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					connection.closeConnection();
+				}
+				
+			} else if (userInput == 0) {
+				System.out.println("\nKoniec programu (end of program).");
+				
+			} else {
+				System.out.println("\nNieprawidłowe polecenie - wpisz jeszcze raz (invalid input - try again).");
+			}
+		}
+		
+		
+		
 		
 		
 		
@@ -481,6 +623,55 @@ public class MainProgram {
 	
 	
 	
+	public static void displayProgramMenu() {
+		System.out.println("\nProgram menu:\n");
+		System.out.println("1 - ilosc zamowien lacznie (total number of orders)");
+		System.out.println("2 - ilosc zamowien do klienta o wskazanym identyfikatorze (total number of orders to a client of selected id)");
+		System.out.println("3 - laczna kwota zamowien (total sum of orders)");
+		System.out.println("4 - laczna kwota zamowien do klienta o wskazanym identyfikatorze (total value of orders to a client of selected id)");
+		System.out.println("5 - lista wszystkich zamowien (list of all orders)");
+		System.out.println("6 - lista zamowien do klienta o wskazanym identyfikatorze (list of orders to a client of selected id)");
+		System.out.println("7 - srednia wartosc zamowienia (average sum of an order)");
+		System.out.println("8 - srednia wartosc zamowienia do klienta o wskazanym identyfikatorze (average sum of an order to a client of selected id)");
+		System.out.println("\n0 - koniec programu (end of program)\n");
+		
+	}
+	
+	
+	static int getNumberFromConsole() {
+		 
+ 		@SuppressWarnings("resource")
+ 		Scanner myScanner = new Scanner(System.in);
+ 		int number;
+ 		System.out.println("Wpisz liczbe (enter a number): ");
+ 
+ 		try {
+ 			number = myScanner.nextInt();
+ 		} catch (Exception e) {
+ 			System.out.println("To nie jest liczba (this is not a number)!");
+ 			number = getNumberFromConsole();
+ 		}
+ 		return number;
+ 	}
+	
+	
+	static String getStringFromConsole() {
+		Scanner myScanner = new Scanner(System.in);
+		System.out.println("Wpisz id uzytkownika (enter user id): ");
+		String string = myScanner.nextLine();
+		return string;
+	}
+	
+	
+	
+	public static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+
+	    long factor = (long) Math.pow(10, places);
+	    value = value * factor;
+	    long tmp = Math.round(value);
+	    return (double) tmp / factor;
+	}
 	
 	
 	
