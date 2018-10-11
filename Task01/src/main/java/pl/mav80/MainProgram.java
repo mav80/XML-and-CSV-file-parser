@@ -379,8 +379,9 @@ public class MainProgram {
 	                Order order = new Order();
 	                
 	                if(ClientId.length() > 6 || ClientId.length() < 1 ||ClientId.contains(" ")) {
-	                	System.out.println("Wrong value of the field ClientId while parsing order, field will have null value.");
-                	 	order.setClientId(null);
+	                	System.out.println("Bledne pole ClientId podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+	                	continue;
+                	 	//order.setClientId(null);
 	                } else {
 	                	order.setClientId(ClientId);
 	                }
@@ -399,14 +400,16 @@ public class MainProgram {
 						}
 	                	
 	                	if(fieldValue < 1) {
-	                		System.out.println("Wrong value of the field RequestId while parsing order, field will have 0 value.");
-	                		order.setRequestId(0);
+	                		System.out.println("Bledne pole RequestId podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+	                		continue;
+	                		//order.setRequestId(0);
 	                	} else {
 	                		order.setRequestId(fieldValue);
 	                	}
 	                } else {
-                		System.out.println("Wrong value of the field RequestId while parsing order, field will have 0 value.");
-                		order.setRequestId(0);
+                		System.out.println("Bledne pole RequestId podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+                		continue;
+                		//order.setRequestId(0);
 	                }
 	                
 	                
@@ -414,8 +417,9 @@ public class MainProgram {
 	                
 	                
 	                if(Name.isEmpty() || Name.length() > 255) {
-                		System.out.println("Wrong value of the field Name while parsing order, field will have null value.");
-                		order.setName(null);
+                		System.out.println("Bledne pole Name podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+                		continue;
+                		//order.setName(null);
 	                } else {
 	                	order.setName(Name);
 	                }
@@ -435,14 +439,16 @@ public class MainProgram {
 						}
 	                	
 	                	if(fieldValue < 1) {
-	                		System.out.println("Wrong value of the field Quantity while parsing order, field will have 0 value.");
-	                		order.setQuantity(0);
+	                		System.out.println("Bledne pole Quantity podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+	                		continue;
+	                		//order.setQuantity(0);
 	                	} else {
 	                		order.setQuantity(fieldValue);
 	                	}
 	                } else {
-                		System.out.println("Wrong value of the field Quantity while parsing order, field will have 0 value.");
-                		order.setQuantity(0);
+                		System.out.println("Bledne pole Quantity podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+                		continue;
+                		//order.setQuantity(0);
 	                }
 	                
 	                            
@@ -460,14 +466,16 @@ public class MainProgram {
 						}
 	                	
 	                	if(fieldValue < 1) {
-	                		System.out.println("Wrong value of the field Price while parsing order, field will have 0 value.");
-	                		order.setPrice(0);
+	                		System.out.println("Bledne pole Price podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+	                		continue;
+	                		//order.setPrice(0);
 	                	} else {
 	                		order.setPrice(fieldValue);
 	                	}
 	                } else {
-                		System.out.println("Wrong value of the field Price while parsing order, field will have 0 value.");
-                		order.setPrice(0);
+                		System.out.println("Bledne pole Price podczas parsowania pliku CSV, zamowienie nie zostanie dodane do bazy.");
+                		continue;
+                		//order.setPrice(0);
 	                }
 	                
 	                parsedOrders.add(order);
@@ -505,8 +513,6 @@ public class MainProgram {
 	
 	public static List<Order> parseXMLfile(String pathToFile) {
 		
-		System.out.println(pathToFile);
-		
 		List<Order> xmlOrders = null;
 		Order xmlOrder = null;
 		String text = null;
@@ -517,7 +523,8 @@ public class MainProgram {
 			XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(new File(pathToFile)));
 			
 	          while (reader.hasNext()) {
-	
+	        	  
+	        		  	
 	               int Event = reader.next();
 
 	               switch (Event) {
@@ -541,14 +548,13 @@ public class MainProgram {
 	                         switch (reader.getLocalName()) {
 	
 	                              case "request": {
-	                            	  xmlOrders.add(xmlOrder);
+	                            	  //xmlOrders.add(xmlOrder);
 	                                  break;
 	                              }
 	
 	                              case "clientId": {        	  
-	              	                if(text.length() > 6 || text.length() < 1 ||text.contains(" ")) {
-	            	                	System.out.println("Wrong value of the field ClientId while parsing XML order, field will have null value.");
-	            	                	xmlOrder.setClientId(null);
+	              	                if(text.length() > 6 || text.length() < 1 || text.contains(" ")) {
+	            	                	System.out.println("Bledne pole ClientId podczas parsowania pliku XML, zamowienie nie zostanie dodane do bazy.");
 	            	                } else {
 	            	                	xmlOrder.setClientId(text);
 	            	                }
@@ -556,19 +562,22 @@ public class MainProgram {
 	                              }
 	
 	                              case "requestId": {
-	                            	  try {
+                            	  try {
 										xmlOrder.setRequestId(Long.parseLong(text));
 									} catch (NumberFormatException e) {
 										// TODO Auto-generated catch block
-										e.printStackTrace();
+										//e.printStackTrace();
 									}
+                            	  
+                            	  if(xmlOrder.getRequestId() < 1) {
+                            		  System.out.println("Bledne pole RequestId podczas parsowania pliku XML, zamowienie nie zostanie dodane do bazy.");
+                            	  }
 	                                break;
 	                              }
 	
 	                              case "name": {
 	              	                if(text.isEmpty() || text.length() > 255) {
-	                            		System.out.println("Wrong value of the field Name while parsing XML order, field will have null value.");
-	                            		xmlOrder.setName(null);
+	                            		System.out.println("Bledne pole Name podczas parsowania pliku XML, zamowienie nie zostanie dodane do bazy.");
 	            	                } else {
 	            	                	xmlOrder.setName(text);
 	            	                }
@@ -576,12 +585,15 @@ public class MainProgram {
 	                              }
 	
 	                              case "quantity": {
-	                            	  try {
+	                            	try {
 										xmlOrder.setQuantity(Integer.parseInt(text));
 									} catch (NumberFormatException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+										//e.printStackTrace();
 									}
+	                            	  
+	                            	  if(xmlOrder.getQuantity() < 1) {
+	                            		  System.out.println("Bledne pole Quantity podczas parsowania pliku XML, zamowienie nie zostanie dodane do bazy.");
+	                            	  }
 	                            	break;
 	                              }
 	                              
@@ -589,9 +601,25 @@ public class MainProgram {
 	                            	  try {
 										xmlOrder.setPrice(Double.parseDouble(text));
 									} catch (NumberFormatException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+										//e.printStackTrace();
 									}
+	                            	  
+	                            	  if(xmlOrder.getPrice() == 0) {
+	                            		  System.out.println("Bledne pole Price podczas parsowania pliku XML, zamowienie nie zostanie dodane do bazy.");
+	                            	  }
+	                            	  
+	                            	  
+	                            	  //check if the order doesn't have any errors, add to the list if it does not
+	                            	  if(xmlOrder.getPrice() == 0 || xmlOrder.getQuantity() < 1 || xmlOrder.getName() == null || xmlOrder.getName().length() < 1 || xmlOrder.getName().length() > 255 || xmlOrder.getRequestId() < 1 
+	                            			  || xmlOrder.getClientId() == null || xmlOrder.getClientId().length() > 6 || xmlOrder.getClientId().length() < 1 || xmlOrder.getClientId().contains(" ")) {
+	                            		  System.out.println("Blad podczas parsowania pliku XML, zamowienie nie zostanie dodane do bazy.");
+	                            		  break;
+	                            	  } else {
+	                            		  xmlOrders.add(xmlOrder);
+	                            	  }
+	                            	  
+	                            	  
+	                            	  
 	                            	break;
 	                              }
 	
@@ -601,7 +629,7 @@ public class MainProgram {
 	               }
 	          }
 		} catch (FileNotFoundException e) {
-			System.out.println("Error parsing CSV file " + pathToFile + " - doesn't exist?");
+			System.out.println("Error parsing XML file " + pathToFile + " - doesn't exist?");
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 		} catch (XMLStreamException e) {
