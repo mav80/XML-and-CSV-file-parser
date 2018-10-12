@@ -12,10 +12,12 @@ public class dbConnection {
 	//metoda na nawiązanie połączenia
 	public Connection getConnection() {
 		try {
-			this.dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/coreserviceszadanierekrutacyjne1?useSSL=false&characterEncoding=utf-8",
-					"root",
-					"coderslab"
-					);
+//			this.dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/coreserviceszadanierekrutacyjne1?useSSL=false&characterEncoding=utf-8",
+//					"root",
+//					"coderslab"
+//					);
+			
+			this.dbConnection =  DriverManager.getConnection("jdbc:hsqldb:mem:orders", "root", "root");
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}

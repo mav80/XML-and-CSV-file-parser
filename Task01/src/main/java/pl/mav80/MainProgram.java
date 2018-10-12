@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -23,6 +24,10 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
 
 
 
@@ -54,6 +59,20 @@ public class MainProgram {
 			System.out.println("Koncowa lista argumentow: " + finalArgs.size() + ", " + (args.length - finalArgs.size()) + " plikow zostalo usunietych z listy.");
 		} else {
 			System.out.println("Nie znalazlem zadnych obslugiwanych formatow plikow!");
+			System.exit(1);
+		}
+		
+		
+		
+		
+		System.out.print("Tworzenie bazy danych w pamieci...");
+		try {
+			initInMemoryDatabase();
+			System.out.println(" zrobione.");
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			System.out.println(" wystapil blad podczas tworzenia bazy, koniec programu.");
+			e1.printStackTrace();
 			System.exit(1);
 		}
 		
@@ -301,6 +320,14 @@ public class MainProgram {
 				}
 				
 			} else if (userInput == 0) {
+				try {
+					destroyInMemoryDatabase();
+					System.out.println("Baza danych poprawnie usunieta z pamieci.");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println("Wystapil blad podczas usuwania bazy danych z pamieci.");
+					e.printStackTrace();
+				}
 				System.out.println("\nKoniec programu.");
 				
 			} else {
@@ -805,6 +832,73 @@ public class MainProgram {
 	
 	
 	
+	private static void initInMemoryDatabase() throws SQLException {
+		
+		        try (Connection connection = getConnection(); 
+		        	
+		        	Statement statement = connection.createStatement();) {
+		            //statement.execute("CREATE TABLE employee (id INT NOT NULL, name VARCHAR(50) NOT NULL," + "email VARCHAR(50) NOT NULL, PRIMARY KEY (id))");
+		        	statement.execute("CREATE TABLE orders (id INT NOT NULL IDENTITY, ClientId VARCHAR(6) NULL, RequestId BIGINT NULL, Name VARCHAR(255) NULL, Quantity INT NULL, Price DOUBLE NULL)");
+		            
+		            connection.commit();
+		            
+//		            statement.executeUpdate("INSERT INTO employee VALUES (1001,'Vinod Kumar Kashyap', 'vinod@javacodegeeks.com')");
+//		            statement.executeUpdate("INSERT INTO employee VALUES (1002,'Dhwani Kashyap', 'dhwani@javacodegeeks.com')");
+//		            statement.executeUpdate("INSERT INTO employee VALUES (1003,'Asmi Kashyap', 'asmi@javacodegeeks.com')");
+		            connection.commit();
+		        }
+		
+		    }
+
+	
+	  private static Connection getConnection() throws SQLException {  
+		          return DriverManager.getConnection("jdbc:hsqldb:mem:orders", "root", "root");
+		  
+		      }
+	  
+	  
+	  
+ 
+	
+	    
+	    private static void destroyInMemoryDatabase() throws SQLException, ClassNotFoundException, IOException {
+	  
+	        try (Connection connection = getConnection(); Statement statement = connection.createStatement();) {
+	
+	            statement.executeUpdate("DROP TABLE orders");
+	
+	            connection.commit();
+	
+	        }
+
+	    }
+
+
+
+	
+	
+	
+	/*
+	  
+	  
+	  CREATE TABLE `coreserviceszadanierekrutacyjne1`.`orders2` (
+			  `id` INT NOT NULL AUTO_INCREMENT,
+			  `ClientId` VARCHAR(6) NULL,
+			  `RequestId` BIGINT NULL,
+			  `Name` VARCHAR(255) NULL,
+			  `Quantity` INT NULL,
+			  `Price` DOUBLE NULL,
+			  PRIMARY KEY (`id`));
+	
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -1253,6 +1347,5 @@ try {
 //} else {
 //	System.out.println("Parsing XML didn't return any valid orders!");
 //}
-
 
 
