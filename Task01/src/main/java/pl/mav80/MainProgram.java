@@ -102,7 +102,13 @@ public class MainProgram {
 
 			if(resultCSV == true) {
 				//System.out.println("Found CSV file, sending for parsing.");
-				List ordersParsed = parseCSVfileWithHeaders(arg);
+				List ordersParsed = null;
+				try {
+					ordersParsed = parseCSVfileWithHeaders(arg);
+				} catch (Exception e) {
+					System.out.println("Blad podczas parsowania pliku " + arg + " - zly format?");
+					//e.printStackTrace();
+				}
 				if(ordersParsed != null) {
 					orders.addAll(ordersParsed);
 				}
@@ -381,7 +387,7 @@ public class MainProgram {
 
 
 	//CSV file parsing method
-	public static List<Order> parseCSVfileWithHeaders(String pathToFile) {
+	public static List<Order> parseCSVfileWithHeaders(String pathToFile) throws Exception {
 
 		List<Order> parsedOrders = new ArrayList<>();
 
