@@ -1,4 +1,6 @@
-This program takes list of XML and CSV files as a parameter and parses them to extract orders in the following format:
+# XML and CSV file parser
+
+This program takes a list of XML and CSV files as a parameter and parses them to extract orders in the following format:
 
 CSV:
 
